@@ -1,0 +1,1 @@
+![Picture](https://github.com/olehsamoilenko/resources/blob/master/AIMethods/L1.png)
