@@ -32,17 +32,22 @@ public class LinearReward {
         long counter = 0;
 
         while (!ready) {
-            /* success of choise-th action */
+            /* choise-th action selected */
             int choice = randomChooser.choose();
-            for (int j = 0; j < probs.length; j++) {
-                if (j == choice) {
-                    probs[choice] = probs[choice] + alpha * (1 - probs[choice]);
-                    if (probs[choice] >= 1.0) {
-                        ready = true;
+            /* if action succeeds */
+            if (randomChooser.successful(choice)) {
+                for (int j = 0; j < probs.length; j++) {
+                    if (j == choice) {
+                        probs[choice] = probs[choice] + alpha * (1 - probs[choice]);
+                        if (probs[choice] >= 1.0) {
+                            ready = true;
+                        }
+                    } else {
+                        probs[j] = probs[j] - alpha * probs[j];
                     }
-                } else {
-                    probs[j] = probs[j] - alpha * probs[j];
                 }
+            } else {
+                /* nothing */
             }
 
             if (iterations > 0 && ++counter == iterations) {

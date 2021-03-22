@@ -1,5 +1,6 @@
 package com.osamoile;
 
+import jdk.swing.interop.SwingInterOpUtils;
 import mathcomp.oletsky.randomchooser.RandomChooser;
 
 import java.util.*;
@@ -13,6 +14,7 @@ import java.util.*;
  */
 public class RandomChooserWrapper {
     private final List<Double> probs = new ArrayList<>();
+    private final List<Double> probsOfSuccess = new ArrayList<>();
 
     /**
      * Constructor for RandomChooserWrapper
@@ -26,14 +28,21 @@ public class RandomChooserWrapper {
         double[] valuesOfActions = new double[numberOfActions];
         for (int i = 0; i < valuesOfActions.length; i++) {
             valuesOfActions[i] = rd.nextDouble();
+            this.probsOfSuccess.add(rd.nextDouble());
         }
 
         /* converting values to probabilities */
-        System.out.print("Generated probabilities: [");
+        System.out.print("Generated probabilities:            [");
         double[] probsArray = RandomChooser.getProbsByValues(valuesOfActions);
-        for(var prob: probsArray) {
+        for (var prob: probsArray) {
             System.out.printf(" %.2f", prob);
-            probs.add(prob);
+            this.probs.add(prob);
+        }
+        System.out.println(" ]");
+
+        System.out.print("Generated probabilities of success: [");
+        for (var prob: this.probsOfSuccess) {
+            System.out.printf(" %.2f", prob);
         }
         System.out.println(" ]");
     }
@@ -50,6 +59,15 @@ public class RandomChooserWrapper {
          */
         double[] probsArray = probs.stream().mapToDouble(i -> i).toArray();
         return RandomChooser.chooseByProps(probsArray);
+    }
+
+    public boolean successful(int indexOfAction) {
+        Random rd = new Random();
+        if (this.probsOfSuccess.get(indexOfAction) > rd.nextDouble()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**

@@ -13,12 +13,12 @@ public class Main {
 
         Double[] res;
         System.out.println("\nTiny alpha:");
-        res = linearReward.run(0.02, 100000);
+        res = linearReward.run(0.03, 1000000);
         printVector(res);
         randomChooser.verifyMostProbableAction(mostProbableAction(res));
 
         System.out.println("\nHuge alpha:");
-        res = linearReward.run(0.3, 100000);
+        res = linearReward.run(0.4, 1000000);
         printVector(res);
         randomChooser.verifyMostProbableAction(mostProbableAction(res));
     }
