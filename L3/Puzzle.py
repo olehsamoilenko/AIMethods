@@ -1,5 +1,6 @@
 import itertools
 import collections
+from typing import Callable
 
 
 class Puzzle:
@@ -11,7 +12,6 @@ class Puzzle:
     def __init__(self, board):
         self.width = len(board[0])
         self.board = board
-
 
     @property 
     def actions(self): # TODO: simpler
@@ -80,7 +80,6 @@ class Puzzle:
             yield from row
 
 
-
 class Node:
     """
     A class representing an Solver node
@@ -97,20 +96,6 @@ class Node:
             self.g = parent.g + 1
         else:
             self.g = 0
-
-    @property
-    def h(self):
-        """"h"""
-        return 0 #self.puzzle.manhattan
-
-    @property
-    def f(self):
-        """"f"""
-        return self.h + self.g
-
-    @property
-    def score(self): # TODO: rename
-        return (self.g + self.h)
 
     @property
     def actions(self):
@@ -134,30 +119,24 @@ class Node:
 
     def __str__(self): # TODO: remove
         return str(self.puzzle)
-        
 
 
 class Solver:
     """
-    An '8-puzzle' solver
-    - 'start' is a Puzzle instance
+    A puzzle solver
     """
-    def __init__(self, start):
-        self.start = start
+    def __init__(self, heuristic_function: Callable[[Puzzle], int] = lambda puzzle: 0):
+        self._h = heuristic_function
 
-    def solve(self):
-        """
-        Perform breadth first search and return a path
-        to the solution, if it exists
-        """
-        queue = collections.deque([Node(self.start)])
+    def solve(self, start: Puzzle):
+        queue = collections.deque([Node(start)])
         seen = set()
         seen.add(queue[0].state)
         while queue:
-            queue = collections.deque(sorted(list(queue), key=lambda node: node.f))
+            queue = collections.deque(sorted(list(queue), key=lambda node: node.g + self._h(node.puzzle)))
             node = queue.popleft()
-            print("Pop node, f=" + str(node.f))
             if node.solved:
+                print("Seen: %d" % len(seen))
                 return node#.path
 
             for move, action in node.actions:
@@ -166,6 +145,25 @@ class Solver:
                 if child.state not in seen:
                     queue.appendleft(child)
                     seen.add(child.state)
+
+
+def wrongplace(puzzle: Puzzle) -> int:
+    distance = 0
+    for i in range(puzzle.width):
+        for j in range(puzzle.width):
+            if puzzle.board[i][j] != (puzzle.width * i + j + 1) % puzzle.width ** 2:
+                distance += 1
+    return distance
+
+
+def manhattan(puzzle: Puzzle) -> int:
+    distance = 0
+    for i in range(3):
+        for j in range(3):
+            if puzzle.board[i][j] != 0:
+                x, y = divmod(puzzle.board[i][j]-1, 3)
+                distance += abs(x - i) + abs(y - j)
+    return distance
 
 
 if __name__ == '__main__':
@@ -178,6 +176,8 @@ if __name__ == '__main__':
     #     [4,5,6],
     #     [0,7,8]]
     puzzle = Puzzle(board)
-    s = Solver(puzzle)
-    p = s.solve()
+    s = Solver(manhattan)
+    # s = Solver()
+    p = s.solve(puzzle)
     p.print()
+    print("Steps to solve: %d" % p.g)
