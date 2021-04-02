@@ -71,6 +71,7 @@ class Puzzle:
     def print(self):
         for i in self.board:
             print(i)
+        print()
 
     def __str__(self): # TODO: remove
         return ''.join(map(str, self))
@@ -136,8 +137,9 @@ class Solver:
             queue = collections.deque(sorted(list(queue), key=lambda node: node.g + self._h(node.puzzle)))
             node = queue.popleft()
             if node.solved:
-                print("Seen: %d" % len(seen))
-                return node#.path
+                print("Open nodes: %d" % len(seen))
+                print("Steps to solve: %d" % node.g)
+                return node
 
             for move, action in node.actions:
                 child = Node(move(), node, action)
@@ -175,9 +177,22 @@ if __name__ == '__main__':
     #     [1,2,3],
     #     [4,5,6],
     #     [0,7,8]]
+
     puzzle = Puzzle(board)
-    s = Solver(manhattan)
-    # s = Solver()
+    print("Initial puzzle:")
+    puzzle.print()
+
+    print("Dijkstra heuristic function")
+    s = Solver()
     p = s.solve(puzzle)
     p.print()
-    print("Steps to solve: %d" % p.g)
+
+    print("Amount of wrong positioned items heuristic function")
+    s = Solver(wrongplace)
+    p = s.solve(puzzle)
+    p.print()
+
+    print("Manhattan heuristic function")
+    s = Solver(manhattan)
+    p = s.solve(puzzle)
+    p.print()
